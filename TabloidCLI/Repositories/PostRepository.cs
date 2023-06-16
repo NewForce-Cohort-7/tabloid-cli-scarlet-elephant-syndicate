@@ -82,8 +82,8 @@ namespace TabloidCLI.Repositories
                         Post post = new Post()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("PostTitle")),
-                            Url = reader.GetString(reader.GetOrdinal("PostUrl")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Url = reader.GetString(reader.GetOrdinal("Url")),
                             PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
                             Author = new Author()
                             {

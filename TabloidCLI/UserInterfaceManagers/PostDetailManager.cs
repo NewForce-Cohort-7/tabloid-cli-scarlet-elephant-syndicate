@@ -25,9 +25,10 @@ namespace TabloidCLI.UserInterfaceManagers
         {
             Post post = _postRepository.Get(_postId);
             Console.WriteLine($"{post.Title} Details");
-            Console.WriteLine(" 1) View");
-            Console.WriteLine(" 2) Add Tag");
-            Console.WriteLine(" 3) Remove Tag");
+            Console.WriteLine(" 1) View Post");
+            Console.WriteLine(" 2) Edit Post");
+            Console.WriteLine(" 3) Add Tag");
+            Console.WriteLine(" 4) Remove Tag");
             Console.WriteLine(" 0) Go Back");
 
             Console.Write("> ");
@@ -38,9 +39,12 @@ namespace TabloidCLI.UserInterfaceManagers
                     View();
                     return this;
                 case "2":
-                    AddTag();
+                    Edit();
                     return this;
                 case "3":
+                    AddTag();
+                    return this;
+                case "4":
                     RemoveTag();
                     return this;
                 case "0":
@@ -64,6 +68,28 @@ namespace TabloidCLI.UserInterfaceManagers
                 Console.WriteLine($" * {tag.Name}");
             }
             Console.WriteLine();
+        }
+
+        private void Edit()
+        {
+            Post post = _postRepository.Get(_postId);
+            Console.WriteLine("Editing Post");
+            Console.Write("New Title (blank to leave unchanged: ");
+            string title = Console.ReadLine();
+            Console.Write("New URL (blank to leave unchanged: ");
+            string url = Console.ReadLine();
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                post.Title = title;
+            }
+
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                post.Url = url;
+            }
+
+            _postRepository.Update(post);
         }
 
         private void AddTag()
