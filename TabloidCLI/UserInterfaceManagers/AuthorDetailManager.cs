@@ -1,4 +1,7 @@
-﻿using System;
+﻿//details for a selected author
+
+
+using System;
 using System.Collections.Generic;
 using TabloidCLI.Models;
 using TabloidCLI.Repositories;

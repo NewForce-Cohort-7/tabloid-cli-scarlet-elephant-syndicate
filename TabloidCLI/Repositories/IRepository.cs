@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+ 
 namespace TabloidCLI
 {
     public interface IRepository<TEntity>
