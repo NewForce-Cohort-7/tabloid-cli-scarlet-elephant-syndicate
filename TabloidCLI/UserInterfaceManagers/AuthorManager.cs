@@ -1,4 +1,5 @@
-﻿using System;
+﻿//main author menu for crud authors as a whole
+using System;
 using System.Collections.Generic;
 using TabloidCLI.Models;
 
