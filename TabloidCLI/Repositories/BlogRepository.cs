@@ -50,44 +50,33 @@ namespace TabloidCLI.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT b.Id AS BlogId,
-                                               b.Title,
-                                               b.Url,
-                                               t.Id AS TagId,
-                                               t.Name
-                                          FROM Blog b 
-                                               LEFT JOIN BlogTag bt on b.Id = bt.BlogId
-                                               LEFT JOIN Tag t on t.Id = at.TagId
-                                         WHERE a.id = @id";
+                    cmd.CommandText = @"SELECT
+                                               Title,
+                                               Url
+                                          FROM Blog 
+                                         WHERE id = @id";
 
                     cmd.Parameters.AddWithValue("@id", id);
 
                     Blog blog = null;
 
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        if (blog == null)
+                        if (reader.Read())
                         {
-                            blog = new Blog()
+                            if (blog == null)
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("BlogId")),
-                                Title = reader.GetString(reader.GetOrdinal("Title")),
-                                Url = reader.GetString(reader.GetOrdinal("Url")),
-                            };
+                                blog = new Blog()
+                                {
+                                    Id = id,
+                                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                                    Url = reader.GetString(reader.GetOrdinal("Url")),
+                                };
+                            }
                         }
 
-                        if (!reader.IsDBNull(reader.GetOrdinal("TagId")))
-                        {
-                            blog.Tags.Add(new Tag()
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("TagId")),
-                                Name = reader.GetString(reader.GetOrdinal("Name")),
-                            });
-                        }
+                        reader.Close();
                     }
-
-                    reader.Close();
 
                     return blog;
                 }
