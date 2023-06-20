@@ -50,7 +50,7 @@ namespace TabloidCLI.UserInterfaceManagers
                     return this;
             }
         }
-
+        //list out all of the tags
         private void List()
         {
             List<Tag> tags = _tagRepository.GetAll();
@@ -59,6 +59,8 @@ namespace TabloidCLI.UserInterfaceManagers
                 Console.WriteLine(tag);
             }
         }
+
+        //index tags in database to allow user selection
         private Tag Choose(string prompt = null)
         {
             if (prompt == null)
@@ -89,7 +91,7 @@ namespace TabloidCLI.UserInterfaceManagers
                 return null;
             }
         }
-
+        //create a new tag
         private void Add()
         {
             Console.WriteLine("Add Tag");
@@ -101,7 +103,7 @@ namespace TabloidCLI.UserInterfaceManagers
             _tagRepository.Insert(tag);
         }
     
-
+        //edit a tag
         private void Edit()
         {
 
@@ -121,7 +123,7 @@ namespace TabloidCLI.UserInterfaceManagers
             _tagRepository.Update(tagToEdit);
 
         }
-
+        //delete a tag
         private void Remove()
         {
             Tag tagToDelete = Choose("Which tag would you like to remove?");

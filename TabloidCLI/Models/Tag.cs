@@ -1,4 +1,7 @@
-﻿namespace TabloidCLI.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace TabloidCLI.Models
 {
     public class Tag
     {
@@ -8,6 +11,11 @@
         public override string ToString()
         {
             return Name;
+        }
+
+        public static implicit operator List<object>(Tag v)
+        {
+            throw new NotImplementedException();
         }
     }
 }
