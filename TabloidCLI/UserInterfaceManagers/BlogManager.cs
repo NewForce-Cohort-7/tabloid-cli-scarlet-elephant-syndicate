@@ -43,9 +43,7 @@ namespace TabloidCLI.UserInterfaceManagers
                     }
                     else
                     {
-                        //return new BlogDetailManager(this, _connectionString, blog.Id);
-                        //THIS REALLY SHOULDN'T RETURN NULL I JUST HAVE THIS SO I CAN DO THE OTHER FEATURES BEFORE MOVING INTO DETAILS
-                        return null;
+                        return new BlogDetailMenu(this, _connectionString, blog.Id);
                     }
                 case "3":
                     Add();
