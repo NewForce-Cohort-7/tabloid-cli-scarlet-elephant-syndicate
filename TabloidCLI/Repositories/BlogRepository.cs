@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using TabloidCLI.Models;
-using TabloidCLI.Repositories;
 using TabloidCLI.UserInterfaceManagers;
 
 namespace TabloidCLI.Repositories
@@ -183,5 +182,57 @@ namespace TabloidCLI.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public List<Post> GetPostByBlog(int blogId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT p.id as PostId,
+                                        p.Title as PostTitle,
+                                        p.URL as PostURL,
+                                        p.PublishDateTime,
+                                        p.AuthorId, 
+                                        p.BlogId,
+                                        b.Title AS BlogTitle,
+                                        b.URL AS BlogUrl
+                                        FROM Post p 
+                                        LEFT JOIN Blog b on p.BlogId = b.Id 
+                                           WHERE p.Blogid = @blogId";
+
+                    cmd.Parameters.AddWithValue("@blogId", blogId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Post> posts = new List<Post>();
+                    while (reader.Read())
+                    {
+                        Post post = new Post()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("PostId")),
+                            Title = reader.GetString(reader.GetOrdinal("PostTitle")),
+                            Url = reader.GetString(reader.GetOrdinal("PostURL")),
+                            PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+
+                            Blog = new Blog()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                                Title = reader.GetString(reader.GetOrdinal("BlogTitle")),
+                                Url = reader.GetString(reader.GetOrdinal("BlogUrl")),
+                            }
+                        };
+                        posts.Add(post);
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+
     }//End of class
 }//End of namespace
