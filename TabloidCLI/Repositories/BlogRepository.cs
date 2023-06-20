@@ -49,34 +49,60 @@ namespace TabloidCLI.Repositories
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
+                    // Adding a join to the query to get the tags for the blog
                 {
                     cmd.CommandText = @"SELECT
-                                               Title,
-                                               Url
-                                          FROM Blog 
-                                         WHERE id = @id";
+                                               b.Id AS BlogId,                 
+                                               b.Title,
+                                               b.URL,
+                                               bt.TagId,
+                                               t.Name
+                                          FROM Blog b
+                                          LEFT JOIN BlogTag bt ON b.Id = bt.BlogId
+                                          LEFT JOIN Tag t ON t.Id = bt.TagId
+                                         WHERE b.Id = @id";
 
                     cmd.Parameters.AddWithValue("@id", id);
 
                     Blog blog = null;
 
-                    using (var reader = cmd.ExecuteReader())
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) //this is a while loop because we are getting multiple rows back
                     {
-                        if (reader.Read())
+                        if (blog == null)
                         {
-                            if (blog == null)
+                            blog = new Blog()
                             {
-                                blog = new Blog()
+                                Id = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Url = reader.GetString(reader.GetOrdinal("Url")),
+                            };
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name")))
+                            {
+                                Tag tag = new Tag()
                                 {
-                                    Id = id,
-                                    Title = reader.GetString(reader.GetOrdinal("Title")),
-                                    Url = reader.GetString(reader.GetOrdinal("Url")),
+                                    Id = reader.GetInt32(reader.GetOrdinal("TagId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
                                 };
+                                blog.Tags.Add(tag);
                             }
                         }
+                        else
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name")))
+                            {
+                                Tag tag = new Tag()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("TagId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                };
+                                blog.Tags.Add(tag);
+                            }
+                        }
+                    }
 
                         reader.Close();
-                    }
+                    
 
                     return blog;
                 }
@@ -132,6 +158,26 @@ namespace TabloidCLI.Repositories
                 }
             }
         }//End of Delete
+
+        // Adding method to add a tag to a blog
+        public void InsertTag(Blog blog, Tag tag)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                        @"INSERT INTO BlogTag (BlogId, TagId)
+                            OUTPUT INSERTED.Id
+                            VALUES (@blogId, @tagId)";
+                    cmd.Parameters.AddWithValue("@blogId", blog.Id);
+                    cmd.Parameters.AddWithValue("@tagId", tag.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
         public SearchResults<Post> SearchPosts(string tagName)
         {

@@ -7,9 +7,10 @@ namespace TabloidCLI
     {
         static void Main(string[] args)
         {
-
+            // Set the console colors
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.ForegroundColor = ConsoleColor.DarkRed;
+
             // MainMenuManager implements the IUserInterfaceManager interface
             IUserInterfaceManager ui = new MainMenuManager();
             while (ui != null)
