@@ -11,12 +11,82 @@ namespace TabloidCLI.Repositories
 
         public List<Post> GetAll()
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT p.Id, p.Title, p.URL, p.PublishDateTime, p.AuthorId, p.BlogId FROM Post p JOIN Author a on p.AuthorId = a.Id JOIN Blog b on p.BlogId = b.Id";
+
+                    List<Post> posts = new List<Post>();
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Post post = new Post()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Url = reader.GetString(reader.GetOrdinal("URL")),
+                            PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                            Author = new Author()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("AuthorId")),
+                            },
+                            Blog = new Blog()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                            }
+                        };
+                        posts.Add(post);
+                    }
+                    reader.Close();
+                    return posts;
+                }
+            }
         }
 
         public Post Get(int id)
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT p.Id, p.Title, p.URL, p.PublishDateTime, p.AuthorId, p.BlogId FROM Post p JOIN Author a on p.AuthorId = a.Id JOIN Blog b on p.BlogId = b.Id WHERE p.Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    Post post = null;
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if (post == null)
+                        {
+                            post = new Post()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Url = reader.GetString(reader.GetOrdinal("URL")),
+                                PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                                Author = new Author()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("AuthorId")),
+                                },
+                                Blog = new Blog()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                                }
+                            };
+                        }
+                    }
+
+                    reader.Close();
+
+                    return post;
+                }
+            }
         }
 
         public List<Post> GetByAuthor(int authorId)
@@ -50,8 +120,8 @@ namespace TabloidCLI.Repositories
                         Post post = new Post()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("PostTitle")),
-                            Url = reader.GetString(reader.GetOrdinal("PostUrl")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Url = reader.GetString(reader.GetOrdinal("Url")),
                             PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
                             Author = new Author()
                             {
@@ -79,17 +149,212 @@ namespace TabloidCLI.Repositories
 
         public void Insert(Post post)
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                //Prompts user to select a blog
+                Console.WriteLine("Select a blog:");
+                List<Blog> blogs = GetBlogs(); // Retrieves a list of blogs from the database
+                for (int i = 0; i <blogs.Count; i++) // Iterates through the list of blogs
+                {
+                   Console.WriteLine($"{i + 1}) {blogs[i].Title}"); // Displays the current blog's title
+                }
+
+                int blogIndex;
+                do
+                {
+                    Console.Write("Enter the number of the blog: "); // Prompts the user to select a blog
+                } while (!int.TryParse(Console.ReadLine(), out blogIndex) || blogIndex < 1 || blogIndex > blogs.Count); // Validates the user's selection
+
+                int blogId = blogs[blogIndex - 1].Id; // Gets the Id of the selected blog
+
+                //Prompts user to select an author
+                Console.WriteLine("Select an author:");
+                List<Author> authors = GetAuthors(); // Retrieves a list of authors from the database
+                for (int i = 0; i < authors.Count; i++) // Iterates through the list of authors
+                {
+                    Author author = authors[i]; // Stores the current author in a variable
+                    Console.WriteLine($"{i + 1}) {author.FullName}"); // Displays the current author's full name
+                }
+
+                int authorIndex; // Declares a variable to store the user's selection
+                do
+                {
+                    Console.Write("Enter the number of the author: "); // Prompts the user to select an author
+                } while (!int.TryParse(Console.ReadLine(), out authorIndex) || authorIndex < 1 || authorIndex > authors.Count); // Validates the user's selection
+
+                int authorId = authors[authorIndex - 1].Id; // Gets the Id of the selected author
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO Post (Title, URL, PublishDateTime, AuthorId, BlogId)
+                        OUTPUT INSERTED.Id
+                        VALUES (@title, @url, @publishDateTime, @authorId,
+                                @blogId)";
+                    cmd.Parameters.AddWithValue("@title", post.Title);
+                    cmd.Parameters.AddWithValue("@url", post.Url);
+                    cmd.Parameters.AddWithValue("@publishDateTime", post.PublishDateTime);
+                    cmd.Parameters.AddWithValue("@authorId",
+                                               authorId);
+                    cmd.Parameters.AddWithValue("@blogId", blogId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         public void Update(Post post)
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        UPDATE Post
+                           SET Title = @title,
+                               URL = @url,
+                               PublishDateTime = @publishDateTime,
+                               AuthorId = @author,
+                               BlogId = @blog
+                         WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@title", post.Title);
+                    cmd.Parameters.AddWithValue("@url", post.Url);
+                    cmd.Parameters.AddWithValue("@publishDateTime", post.PublishDateTime);
+                    cmd.Parameters.AddWithValue("@author",
+                                                                      post.Author.Id);
+                    cmd.Parameters.AddWithValue("@blog", post.Blog.Id);
+                    cmd.Parameters.AddWithValue("@id", post.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE FROM Post WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
-    }
+
+        public void InsertTag(Post post, Tag tag)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                        @"INSERT INTO PostTag (PostId, TagId)
+                        OUTPUT INSERTED.Id
+                        VALUES (@postId, @tagId)";
+                    cmd.Parameters.AddWithValue("@postId", post.Id);
+                    cmd.Parameters.AddWithValue("@tagId", tag.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void DeleteTag(int postId, int tagId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                        @"DELETE FROM PostTag WHERE PostId = @postId AND TagId = @tagId";
+                    cmd.Parameters.AddWithValue("@postId", postId);
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        
+        public List<Author> GetAuthors()
+        {
+            List<Author> authors = new List<Author>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, FirstName, LastName
+                        FROM Author";
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                            string lastName = reader.GetString(reader.GetOrdinal("LastName"));
+
+                            Author author = new Author()
+                            {
+                                Id = id,
+                                FirstName = firstName,
+                                LastName = lastName
+                            };
+
+                            authors.Add(author);
+                        }
+                    }
+                }
+            }
+            return authors;
+        }
+
+        public List<Blog> GetBlogs()
+        {
+            List<Blog> blogs = new List<Blog>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, Title, Url
+                        FROM Blog";
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string title = reader.GetString(reader.GetOrdinal("Title"));
+                            string url = reader.GetString(reader.GetOrdinal("Url"));
+
+                            Blog blog = new Blog
+                            {
+                                Id = id,
+                                Title = title,
+                                Url = url
+                            };
+
+                            blogs.Add(blog);
+                        }
+                    }
+                }
+            }
+            return blogs;
+        }
+    }       
 }
