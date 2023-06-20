@@ -170,8 +170,7 @@ namespace TabloidCLI
                                                p.Title,
                                                p.Url,
                                                p.PublishDateTime, 
-                                               p.AuthorId,
-                                               p.BlogId
+                                               
                                                FROM Post p
                                                LEFT JOIN Blog b on p.BlogId = p.Id
                                                LEFT JOIN BlogTag bt on b.Id = bt.BlogId
@@ -190,7 +189,7 @@ namespace TabloidCLI
                             Url = reader.GetString(reader.GetOrdinal("Url")),
                             PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
                             //AuthorId = reader.GetInt32(reader.GetOrdinal("AuthorId")),
-                            //BlogId = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                            //BlogId = reader.GetInt32(reader.GetOrdinal("BlogId")), I believe we would need to do similar if/else loops on PostRepository. 
                         };
                         results.Add(post);
                     }

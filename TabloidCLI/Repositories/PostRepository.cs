@@ -19,11 +19,10 @@ namespace TabloidCLI.Repositories
                 {
                     cmd.CommandText = @"SELECT p.Id, 
                                        p.Title, 
-                                       p.URL, 
+                                       p.URL,    
                                        p.PublishDateTime, 
                                        p.AuthorId, 
                                        p.BlogId 
-                                       
                                        FROM Post p 
                                        JOIN Author a on p.AuthorId = a.Id 
                                        JOIN Blog b on p.BlogId = b.Id";
@@ -65,7 +64,7 @@ namespace TabloidCLI.Repositories
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
-                {
+                {//add SQL search to find post tags. Joined to tag on ID
                     cmd.CommandText = @"SELECT p.Id AS PostId,
                                                p.Title,
                                                p.URL,
@@ -82,7 +81,7 @@ namespace TabloidCLI.Repositories
                     Post post = null;
 
                     SqlDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                    while (reader.Read())//this while loop and first if statement gets the posts. If a post is null creates a new post. If the tag is null it allows input of a new tag
                     {
                         if (post == null)
                         {
@@ -93,7 +92,7 @@ namespace TabloidCLI.Repositories
                                 Url = reader.GetString(reader.GetOrdinal("Url")),
                                 PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime"))
                             };
-                            if (!reader.IsDBNull(reader.GetOrdinal("Name"))) //if this ordinal of Name is not null
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name"))) //checks to see if name (what we are calling in the post tags) is null
                             {
                                 Tag tag = new Tag()
                                 {
@@ -103,9 +102,9 @@ namespace TabloidCLI.Repositories
                                 post.Tags.Add(tag);
                             }
                         }
-                        else
+                        else //if there is a post with no tag you can make a tag
                         {
-                            if (!reader.IsDBNull(reader.GetOrdinal("Name"))) //if this ordinal of Name is not null
+                            if (!reader.IsDBNull(reader.GetOrdinal("Name"))) 
                             {
                                 Tag tag = new Tag()
                                 {
