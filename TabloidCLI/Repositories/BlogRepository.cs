@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using TabloidCLI.Models;
 using TabloidCLI.Repositories;
+using TabloidCLI.UserInterfaceManagers;
 
 namespace TabloidCLI.Repositories
 {
@@ -142,5 +143,10 @@ namespace TabloidCLI.Repositories
                 }
             }
         }//End of Delete
+
+        public SearchResults<Post> SearchPosts(string tagName)
+        {
+            throw new NotImplementedException();
+        }
     }//End of class
 }//End of namespace

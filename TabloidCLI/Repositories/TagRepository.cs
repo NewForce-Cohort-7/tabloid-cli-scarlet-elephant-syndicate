@@ -39,11 +39,41 @@ namespace TabloidCLI
             }
         }
 
+
         public Tag Get(int id)
         {
-            throw new NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+
+                    cmd.CommandText = @"SELECT Tag.Id, 
+                                            Tag.Name
+                                       FROM Tag
+                                       WHERE Tag.Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Tag tag = null;
+                    if (reader.Read())
+                    {
+                        tag = new Tag()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+
+                        };
+                    }
+
+                    reader.Close();
+
+                    return tag;
+                }
+            }
         }
 
+        //create a new tag
         public void Insert(Tag tag)
         {
             using (SqlConnection conn = Connection)
@@ -54,12 +84,12 @@ namespace TabloidCLI
                     cmd.CommandText = @"INSERT INTO Tag (Name )
                                                      VALUES (@Name)";
                     cmd.Parameters.AddWithValue("@Name", tag.Name);
-                  
+
                     cmd.ExecuteNonQuery();
                 }
             }
         }
-
+        //edit a selected tag
         public void Update(Tag tag)
         {
             using (SqlConnection conn = Connection)
@@ -74,7 +104,7 @@ namespace TabloidCLI
                 }
             }
         }
-
+        //delete a selected tag
         public void Delete(int id)
         {
             using (SqlConnection conn = Connection)
@@ -89,6 +119,7 @@ namespace TabloidCLI
             }
         }
 
+        //search Authors by associated tag
         public SearchResults<Author> SearchAuthors(string tagName)
         {
             using (SqlConnection conn = Connection)
@@ -126,5 +157,51 @@ namespace TabloidCLI
                 }
             }
         }
+
+        //search Posts by associated tag
+        public SearchResults<Post> SearchPosts(string tagName)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT p.id,
+                                               p.Title,
+                                               p.Url,
+                                               p.PublishDateTime, 
+                                               p.AuthorId,
+                                               p.BlogId
+                                               FROM Post p
+                                               LEFT JOIN Blog b on p.BlogId = p.Id
+                                               LEFT JOIN BlogTag bt on b.Id = bt.BlogId
+                                               LEFT JOIN Tag t on t.Id = t.Id
+                                         WHERE t.Name LIKE @name";
+                    cmd.Parameters.AddWithValue("@name", $"%{tagName}%");
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    SearchResults<Post> results = new SearchResults<Post>();
+                    while (reader.Read())
+                    {
+                        Post post = new Post()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Url = reader.GetString(reader.GetOrdinal("Url")),
+                            PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                            //AuthorId = reader.GetInt32(reader.GetOrdinal("AuthorId")),
+                            //BlogId = reader.GetInt32(reader.GetOrdinal("BlogId")),
+                        };
+                        results.Add(post);
+                    }
+
+                    reader.Close();
+
+                   return results;
+                    }
+                }
+            }
+
+
+        }
     }
-}

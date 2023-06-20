@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using TabloidCLI.Models;
 using TabloidCLI.Repositories;
+using TabloidCLI.UserInterfaceManagers;
 
 namespace TabloidCLI
 {
@@ -196,6 +197,11 @@ namespace TabloidCLI
             {
                 Console.WriteLine("Invalid input. Please enter a valid entry ID.");
             }
+        }
+
+        public SearchResults<Post> SearchPosts(string tagName)
+        {
+            throw new NotImplementedException();
         }
     }
 }
