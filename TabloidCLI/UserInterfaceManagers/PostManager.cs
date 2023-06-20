@@ -116,12 +116,15 @@ namespace TabloidCLI.UserInterfaceManagers
             Console.Write("Publish Date: ");
             post.PublishDateTime = DateTime.Parse(Console.ReadLine());
 
-            //Console.Write("Author: ");
-            //post.Author = Console.ReadLine();
+            // Retrieve the list of authors
+            List<Author> authors = _postRepository.GetAuthors();
+            
+            
 
-            //Console.Write("Blog: ");
-            //post.Blog = Console.ReadLine();
+            // Retrieve the list of blogs
+            List<Blog> blogs = _postRepository.GetBlogs();
 
+            
             _postRepository.Insert(post);
         }
 
@@ -152,18 +155,34 @@ namespace TabloidCLI.UserInterfaceManagers
             {
                 postToEdit.PublishDateTime = DateTime.Parse(publishDate);
             }
-            //Console.Write("New author (blank to leave unchanged: ");
-            //string author = Console.ReadLine();
-            //if (!string.IsNullOrWhiteSpace(author))
-            //{
-            //    postToEdit.Author = author;
-            //}
-            //Console.Write("New blog (blank to leave unchanged: ");
-            //string blog = Console.ReadLine();
-            //if (!string.IsNullOrWhiteSpace(blog))
-            //{
-            //    postToEdit.Blog = blog;
-            //}
+
+            // Retrieve the list of authors
+            List<Author> authors = _postRepository.GetAuthors();
+            Console.WriteLine("Available Authors:");
+            for (int i = 0; i < authors.Count; i++)
+            {
+                Console.WriteLine($" {i + 1}) {authors[i].FullName}");  
+            }
+            Console.Write("New author (blank to leave unchanged: ");
+            string author = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(author) && int.TryParse(author, out int authorIndex) && authorIndex >= 1 && authorIndex <= authors.Count)
+            {
+                postToEdit.Author = authors[authorIndex - 1];
+            }
+
+            // Retrieve the list of blogs
+            List<Blog> blogs = _postRepository.GetBlogs();
+            Console.WriteLine("Available Blogs:");
+            for (int i = 0; i < blogs.Count; i++)
+            {
+                Console.WriteLine($" {i + 1}) {blogs[i].Title}");  
+            }
+            Console.Write("New blog (blank to leave unchanged: ");
+            string blog = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(blog) && int.TryParse(blog, out int blogIndex) && blogIndex >= 1 && blogIndex <= blogs.Count)
+            {
+                postToEdit.Blog = blogs[blogIndex - 1];
+            }
 
             _postRepository.Update(postToEdit);
         }

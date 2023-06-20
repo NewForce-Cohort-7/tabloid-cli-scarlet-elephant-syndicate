@@ -18,6 +18,7 @@ namespace TabloidCLI.UserInterfaceManagers
             _parentUI = parentUI;
             _postRepository = new PostRepository(connectionString);
             _tagRepository = new TagRepository(connectionString);
+            _authorRepository = new AuthorRepository(connectionString);
             _postId = postId;
         }
 
@@ -58,16 +59,28 @@ namespace TabloidCLI.UserInterfaceManagers
         private void View()
         {
             Post post = _postRepository.Get(_postId);
+
+            if (post == null)
+            {
+                Console.WriteLine("Invalid Post Id.");
+                return;
+            }
+
+            Author author = _authorRepository.Get(post.Author.Id);
+            /*List<Tag> tags = _tagRepository.Get(post.Id);*/ //**IN CASE WE REACH THE STRETCH GOAL OF ADDING TAGS TO POSTS**//
+
             Console.WriteLine($"Title: {post.Title}");
             Console.WriteLine($"URL: {post.Url}");
             Console.WriteLine($"Publication Date: {post.PublishDateTime}");
-            Console.WriteLine($"Author: {post.Author.FullName}");
+            Console.WriteLine($"Author: {author?.FullName ?? "Unknown"}");
             Console.WriteLine("Tags:");
-            foreach (Tag tag in post.Tags)
-            {
-                Console.WriteLine($" * {tag.Name}");
-            }
-            Console.WriteLine();
+
+            //**IN CASE WE REACH THE STRETCH GOAL OF ADDING TAGS TO POSTS**//
+            //foreach (Tag tag in post.Tags)
+            //{
+            //    Console.WriteLine($" * {tag.Name}");
+            //}
+            //Console.WriteLine();
         }
 
         private void Edit()
