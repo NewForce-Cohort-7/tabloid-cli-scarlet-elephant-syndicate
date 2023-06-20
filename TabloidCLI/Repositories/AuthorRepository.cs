@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using TabloidCLI.Models;
 using TabloidCLI.Repositories;
+using TabloidCLI.UserInterfaceManagers;
 
 namespace TabloidCLI
 {
@@ -187,5 +187,10 @@ namespace TabloidCLI
                 }
             }
         }
-     }
+
+        public SearchResults<Post> SearchPosts(string tagName)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }

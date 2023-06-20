@@ -66,30 +66,28 @@ namespace TabloidCLI.UserInterfaceManagers
                 return;
             }
 
-            Author author = _authorRepository.Get(post.Author.Id);
-            /*List<Tag> tags = _tagRepository.Get(post.Id);*/ //**IN CASE WE REACH THE STRETCH GOAL OF ADDING TAGS TO POSTS**//
+            //Author author = _authorRepository.Get(post.Author.Id);
+            //Tag tags = _tagRepository.Get(tags.Id);
 
             Console.WriteLine($"Title: {post.Title}");
             Console.WriteLine($"URL: {post.Url}");
             Console.WriteLine($"Publication Date: {post.PublishDateTime}");
-            Console.WriteLine($"Author: {author?.FullName ?? "Unknown"}");
-            Console.WriteLine("Tags:");
-
-            //**IN CASE WE REACH THE STRETCH GOAL OF ADDING TAGS TO POSTS**//
-            //foreach (Tag tag in post.Tags)
-            //{
-            //    Console.WriteLine($" * {tag.Name}");
-            //}
-            //Console.WriteLine();
+            //Console.WriteLine($"Author: {author?.FullName ?? "Unknown"}");
+            Console.WriteLine($"Tags: ");  
+            foreach (Tag tag in post.Tags)
+            {
+                Console.WriteLine($" " + tag);
+            }
+            Console.WriteLine();
         }
 
         private void Edit()
         {
             Post post = _postRepository.Get(_postId);
             Console.WriteLine("Editing Post");
-            Console.Write("New Title (blank to leave unchanged: ");
+            Console.Write("New Title (blank to leave unchanged): ");
             string title = Console.ReadLine();
-            Console.Write("New URL (blank to leave unchanged: ");
+            Console.Write("New URL (blank to leave unchanged): ");
             string url = Console.ReadLine();
 
             if (!string.IsNullOrWhiteSpace(title))
@@ -108,11 +106,15 @@ namespace TabloidCLI.UserInterfaceManagers
         private void AddTag()
         {
             Post post = _postRepository.Get(_postId);
+
             Console.WriteLine($"Which tag would you like to add to {post.Title}?");
+
             List<Tag> tags = _tagRepository.GetAll();
+
             for (int i = 0; i < tags.Count; i++)
             {
-                Console.WriteLine($"{i + 1}) {tags[i].Name}");
+                Tag tag = tags[i];
+                Console.WriteLine($"{i + 1}) {tag.Name}");
             }
             Console.Write("> ");
             string input = Console.ReadLine();
