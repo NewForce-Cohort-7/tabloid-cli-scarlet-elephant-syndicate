@@ -24,6 +24,11 @@ namespace TabloidCLI.UserInterfaceManagers
             Console.WriteLine("Blog Details");
             Console.WriteLine($"Title: {blog.Title}");
             Console.WriteLine($"Url: {blog.Url}");
+            Console.WriteLine($"Tags: "); // Shows the tags associated with the blog
+            foreach (Tag tag in blog.Tags)
+            {
+                Console.WriteLine($" " + tag);
+            }
             Console.WriteLine();
 
             Console.WriteLine("1) Edit");
