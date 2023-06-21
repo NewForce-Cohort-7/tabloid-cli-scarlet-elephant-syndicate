@@ -46,9 +46,10 @@ namespace TabloidCLI.UserInterfaceManagers
                 case "3":
                     return null;
                 case "4":
-                    return null;
+                    ViewBlogPosts2(_blogRepository);
+                    return this;
                 case "5":
-                    return null;
+                    return _parentUI;
                 case "0":
                     Console.WriteLine("Good bye");
                     return null;
@@ -86,7 +87,20 @@ namespace TabloidCLI.UserInterfaceManagers
             }
         }
 
+        private BlogRepository Get_blogRepository()
+        {
+            return _blogRepository;
+        }
 
+        private void ViewBlogPosts2(BlogRepository _blogRepository)
+        {
+            List<Post> posts = _blogRepository.GetPostByBlog(_blogId);
+            foreach (Post post in posts)
+            {
+                Console.WriteLine(post);
+            }
+            Console.WriteLine();
+        }
 
 
     }
